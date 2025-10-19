@@ -61,7 +61,7 @@ export default function Submit() {
         setMessage(data.error || 'Failed to submit paper')
         setMessageType('error')
       }
-    } catch (error) {
+    } catch {
       setMessage('Network error. Please try again.')
       setMessageType('error')
     } finally {

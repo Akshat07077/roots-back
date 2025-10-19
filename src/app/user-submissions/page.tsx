@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
 
 interface Article {
   id: string
@@ -47,7 +48,7 @@ export default function UserSubmissions() {
       } else {
         setError(data.error || 'Failed to fetch user data')
       }
-    } catch (error) {
+    } catch {
       setError('Network error. Please try again.')
     } finally {
       setLoading(false)
@@ -190,12 +191,12 @@ export default function UserSubmissions() {
 
         {/* Navigation */}
         <div className="mt-8 text-center">
-          <a 
+          <Link 
             href="/" 
             className="text-blue-600 hover:text-blue-800 text-sm"
           >
             ← Back to Test Dashboard
-          </a>
+          </Link>
         </div>
       </div>
     </div>

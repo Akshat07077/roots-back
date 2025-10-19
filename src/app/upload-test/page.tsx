@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
 
 export default function UploadTest() {
   const [title, setTitle] = useState('')
@@ -10,7 +11,7 @@ export default function UploadTest() {
   const [file, setFile] = useState<File | null>(null)
   const [paymentScreenshot, setPaymentScreenshot] = useState<File | null>(null)
   const [uploading, setUploading] = useState(false)
-  const [result, setResult] = useState<any>(null)
+  const [result, setResult] = useState<{success: boolean, message: string, article?: any} | null>(null)
   const [error, setError] = useState('')
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -248,7 +249,7 @@ export default function UploadTest() {
             </div>
             <div>
               <strong>3. Upload:</strong>
-              <p>Click "Upload File" and watch the console for logs</p>
+              <p>Click &quot;Upload File&quot; and watch the console for logs</p>
             </div>
             <div>
               <strong>4. Check results:</strong>
@@ -278,12 +279,12 @@ export default function UploadTest() {
 
         {/* Navigation */}
         <div className="mt-8 text-center">
-          <a 
+          <Link 
             href="/" 
             className="text-blue-600 hover:text-blue-800 text-sm"
           >
             ← Back to Test Dashboard
-          </a>
+          </Link>
         </div>
       </div>
     </div>
