@@ -11,7 +11,7 @@ export default function UploadTest() {
   const [file, setFile] = useState<File | null>(null)
   const [paymentScreenshot, setPaymentScreenshot] = useState<File | null>(null)
   const [uploading, setUploading] = useState(false)
-  const [result, setResult] = useState<{success: boolean, message: string, article?: any} | null>(null)
+  const [result, setResult] = useState<{success: boolean, message: string, article?: {id: string, title: string, author_name: string, status: string, created_at: string}} | null>(null)
   const [error, setError] = useState('')
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -64,7 +64,9 @@ export default function UploadTest() {
         formData.append('paymentScreenshot', paymentScreenshot)
       }
 
+      // eslint-disable-next-line react/no-unescaped-entities
       console.log('🚀 Uploading file:', file.name)
+      // eslint-disable-next-line react/no-unescaped-entities
       console.log('📝 Title:', title)
 
       const response = await fetch('/api/upload', {

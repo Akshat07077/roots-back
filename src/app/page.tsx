@@ -149,7 +149,7 @@ export default function Home() {
             <div>
               <strong>2. Test File Upload (Command Line):</strong>
               <pre className="bg-gray-100 p-2 rounded mt-1 text-xs">
-curl -X POST http://localhost:3000/api/upload -F "title=Test Paper" -F "file=@test.docx"
+curl -X POST http://localhost:3000/api/upload -F &quot;title=Test Paper&quot; -F &quot;file=@test.docx&quot;
               </pre>
             </div>
             <div>
@@ -172,7 +172,7 @@ node test-api.js
           <div className="bg-white rounded-lg shadow p-6 mt-8">
             <h2 className="text-xl font-semibold mb-4">Approved Articles ({articles.length})</h2>
             <div className="space-y-3">
-              {articles.map((article: any) => (
+              {articles.map((article: {id: string, title: string, status: string, created_at: string, docx_url?: string}) => (
                 <div key={article.id} className="p-3 border rounded">
                   <h3 className="font-medium">{article.title}</h3>
                   <p className="text-sm text-gray-500">
