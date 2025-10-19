@@ -1,5 +1,6 @@
 'use client'
 
+import Link from 'next/link'
 import { useEffect, useState } from 'react'
 
 interface Article {
@@ -160,12 +161,12 @@ export default function AdminTest() {
               </div>
               <h3 className="text-lg font-medium text-gray-900 mb-2">No articles yet</h3>
               <p className="text-gray-500 mb-4">Upload some files first to test the admin system.</p>
-              <a 
+              <Link 
                 href="/upload-test" 
                 className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700"
               >
                 Upload Test File
-              </a>
+              </Link>
             </div>
           ) : (
             <div className="divide-y divide-gray-200">
@@ -183,24 +184,24 @@ export default function AdminTest() {
                         <span>ID: {article.id}</span>
                         <span>Created: {new Date(article.created_at).toLocaleDateString()}</span>
                         {article.docx_url && (
-                          <a 
+                          <Link 
                             href={article.docx_url} 
                             target="_blank" 
                             rel="noopener noreferrer"
                             className="text-blue-600 hover:text-blue-800"
                           >
                             Download DOCX
-                          </a>
+                          </Link>
                         )}
                         {article.payment_screenshot_url && (
-                          <a 
+                          <Link 
                             href={article.payment_screenshot_url} 
                             target="_blank" 
                             rel="noopener noreferrer"
                             className="text-green-600 hover:text-green-800"
                           >
                             View Payment
-                          </a>
+                          </Link>
                         )}
                       </div>
                     </div>
@@ -236,18 +237,18 @@ export default function AdminTest() {
 
         {/* Navigation */}
         <div className="mt-8 text-center space-x-4">
-          <a 
+          <Link 
             href="/" 
             className="text-blue-600 hover:text-blue-800 text-sm"
           >
             ← Back to Test Dashboard
-          </a>
-          <a 
+            </Link>
+          <Link 
             href="/upload-test" 
             className="text-blue-600 hover:text-blue-800 text-sm"
           >
             Upload Test File →
-          </a>
+            </Link>
         </div>
       </div>
     </div>
