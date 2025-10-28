@@ -104,6 +104,40 @@ export default function Home() {
                 </div>
               </div>
             </a>
+
+            <a 
+              href="/contact" 
+              className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+            >
+              <div className="flex items-center">
+                <div className="p-2 bg-orange-100 rounded-lg mr-3">
+                  <svg className="h-6 w-6 text-orange-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="font-medium text-gray-900">Contact Us</h3>
+                  <p className="text-sm text-gray-500">Send us a message</p>
+                </div>
+              </div>
+            </a>
+
+            <a 
+              href="/about/editorial-board" 
+              className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+            >
+              <div className="flex items-center">
+                <div className="p-2 bg-indigo-100 rounded-lg mr-3">
+                  <svg className="h-6 w-6 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="font-medium text-gray-900">Editorial Board</h3>
+                  <p className="text-sm text-gray-500">Meet our experts</p>
+                </div>
+              </div>
+            </a>
           </div>
         </div>
 
@@ -126,6 +160,18 @@ export default function Home() {
             <div className="flex items-center justify-between p-3 bg-gray-50 rounded">
               <span><strong>PATCH</strong> /api/admin/approve</span>
               <span className="text-yellow-600">⚠️ Test with admin form</span>
+            </div>
+            <div className="flex items-center justify-between p-3 bg-gray-50 rounded">
+              <span><strong>POST</strong> /api/contact</span>
+              <span className="text-green-600">✅ Working</span>
+            </div>
+            <div className="flex items-center justify-between p-3 bg-gray-50 rounded">
+              <span><strong>GET</strong> /api/editorial-board</span>
+              <span className="text-green-600">✅ Working</span>
+            </div>
+            <div className="flex items-center justify-between p-3 bg-gray-50 rounded">
+              <span><strong>POST</strong> /api/editorial-board</span>
+              <span className="text-green-600">✅ Working</span>
             </div>
           </div>
         </div>

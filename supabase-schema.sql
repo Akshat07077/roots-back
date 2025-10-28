@@ -64,3 +64,52 @@ CREATE POLICY "Allow service role to manage all users" ON users
 -- Allow public read access to users (for admin to see contact info)
 CREATE POLICY "Allow public read access to users" ON users
   FOR SELECT USING (true);
+
+-- Create contact_us table for contact form submissions
+CREATE TABLE contact_us (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  name VARCHAR(255) NOT NULL,
+  email VARCHAR(255) NOT NULL,
+  subject VARCHAR(255) NOT NULL,
+  message TEXT NOT NULL,
+  phone VARCHAR(20),
+  organization VARCHAR(255),
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Create editorial_board table for editorial board members
+CREATE TABLE editorial_board (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  name VARCHAR(255) NOT NULL,
+  title VARCHAR(255) NOT NULL,
+  affiliation VARCHAR(255) NOT NULL,
+  email VARCHAR(255),
+  bio TEXT,
+  photo_url TEXT,
+  order_index INTEGER DEFAULT 0,
+  is_active BOOLEAN DEFAULT true,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Enable RLS for contact_us table
+ALTER TABLE contact_us ENABLE ROW LEVEL SECURITY;
+
+-- Allow public to insert contact form submissions
+CREATE POLICY "Allow public to insert contact submissions" ON contact_us
+  FOR INSERT WITH CHECK (true);
+
+-- Allow service role to manage all contact submissions
+CREATE POLICY "Allow service role to manage contact submissions" ON contact_us
+  FOR ALL USING (auth.role() = 'service_role');
+
+-- Enable RLS for editorial_board table
+ALTER TABLE editorial_board ENABLE ROW LEVEL SECURITY;
+
+-- Allow public read access to active editorial board members
+CREATE POLICY "Allow public read access to active editorial board" ON editorial_board
+  FOR SELECT USING (is_active = true);
+
+-- Allow service role to manage all editorial board members
+CREATE POLICY "Allow service role to manage editorial board" ON editorial_board
+  FOR ALL USING (auth.role() = 'service_role');
