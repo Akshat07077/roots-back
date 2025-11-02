@@ -31,15 +31,16 @@ export async function POST(request: NextRequest) {
       title, 
       affiliation, 
       email, 
+      phone_number,
       bio, 
       photo_url, 
       order_index = 0 
     } = body
 
     // Validate required fields
-    if (!name || !title || !affiliation) {
+    if (!name || !title) {
       return NextResponse.json(
-        { error: 'Name, title, and affiliation are required' },
+        { error: 'Name and title (profession) are required' },
         { status: 400 }
       )
     }
@@ -60,9 +61,10 @@ export async function POST(request: NextRequest) {
       .from('editorial_board')
       .insert({
         name: name.trim(),
-        title: title.trim(),
+        title: title.trim(), // This is the profession
         affiliation: affiliation.trim(),
         email: email?.trim().toLowerCase() || null,
+        phone_number: phone_number?.trim() || null,
         bio: bio?.trim() || null,
         photo_url: photo_url?.trim() || null,
         order_index: order_index || 0,
@@ -98,7 +100,8 @@ export async function PUT(request: NextRequest) {
       name, 
       title, 
       affiliation, 
-      email, 
+      email,
+      phone_number,
       bio, 
       photo_url, 
       order_index,
@@ -113,9 +116,9 @@ export async function PUT(request: NextRequest) {
     }
 
     // Validate required fields
-    if (!name || !title || !affiliation) {
+    if (!name || !title) {
       return NextResponse.json(
-        { error: 'Name, title, and affiliation are required' },
+        { error: 'Name and title are required' },
         { status: 400 }
       )
     }
@@ -139,6 +142,7 @@ export async function PUT(request: NextRequest) {
         title: title.trim(),
         affiliation: affiliation.trim(),
         email: email?.trim().toLowerCase() || null,
+        phone_number: phone_number?.trim() || null,
         bio: bio?.trim() || null,
         photo_url: photo_url?.trim() || null,
         order_index: order_index || 0,

@@ -13,13 +13,40 @@ interface Article {
   updated_at: string
 }
 
+interface EditorialMember {
+  id: string
+  name: string
+  title: string
+  affiliation: string
+  email?: string
+  phone_number?: string
+  photo_url?: string
+  bio?: string
+}
+
 export default function Admin() {
   const [articles, setArticles] = useState<Article[]>([])
   const [loading, setLoading] = useState(true)
   const [updating, setUpdating] = useState<string | null>(null)
+  
+  // Editorial Board State
+  const [showEditorialForm, setShowEditorialForm] = useState(false)
+  const [editorialMembers, setEditorialMembers] = useState<EditorialMember[]>([])
+  const [submittingEditorial, setSubmittingEditorial] = useState(false)
+  const [editorialFormData, setEditorialFormData] = useState({
+    name: '',
+    phone_number: '',
+    email: '',
+    title: '', // profession
+    affiliation: '',
+    photo_file: null as File | null,
+    photo_url: '',
+    bio: ''
+  })
 
   useEffect(() => {
     fetchArticles()
+    fetchEditorialMembers()
   }, [])
 
   const fetchArticles = async () => {
@@ -83,6 +110,106 @@ export default function Admin() {
 
   const statusCounts = getStatusCounts()
 
+  // Editorial Board Functions
+  const fetchEditorialMembers = async () => {
+    try {
+      const response = await fetch('/api/editorial-board')
+      const data = await response.json()
+      if (response.ok) {
+        setEditorialMembers(data.members || [])
+      }
+    } catch (error) {
+      console.error('Failed to fetch editorial members:', error)
+    }
+  }
+
+  const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        alert('File size must be less than 5MB')
+        return
+      }
+      setEditorialFormData({ ...editorialFormData, photo_file: file })
+    }
+  }
+
+  const handleEditorialSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    
+    if (!editorialFormData.name || !editorialFormData.title) {
+      alert('Please fill in all required fields: Name and Profession')
+      return
+    }
+
+    setSubmittingEditorial(true)
+
+    try {
+      let photoUrl = editorialFormData.photo_url
+
+      // Upload photo if file is provided
+      if (editorialFormData.photo_file) {
+        const uploadFormData = new FormData()
+        uploadFormData.append('file', editorialFormData.photo_file)
+
+        const uploadResponse = await fetch('/api/editorial-board/upload', {
+          method: 'POST',
+          body: uploadFormData
+        })
+
+        const uploadData = await uploadResponse.json()
+
+        if (!uploadResponse.ok) {
+          throw new Error(uploadData.error || 'Failed to upload profile picture')
+        }
+
+        photoUrl = uploadData.photo_url
+      }
+
+      // Submit member data
+      const response = await fetch('/api/editorial-board', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: editorialFormData.name,
+          phone_number: editorialFormData.phone_number,
+          email: editorialFormData.email,
+          title: editorialFormData.title, // profession
+          affiliation: editorialFormData.affiliation,
+          photo_url: photoUrl,
+          bio: editorialFormData.bio
+        }),
+      })
+
+      const data = await response.json()
+
+      if (response.ok) {
+        alert('Editorial board member added successfully!')
+        setEditorialFormData({
+          name: '',
+          phone_number: '',
+          email: '',
+          title: '',
+          affiliation: '',
+          photo_file: null,
+          photo_url: '',
+          bio: ''
+        })
+        setShowEditorialForm(false)
+        fetchEditorialMembers()
+      } else {
+        alert(data.error || 'Failed to add member')
+      }
+    } catch (error: any) {
+      console.error('Error adding member:', error)
+      alert(error?.message || 'Failed to add editorial board member')
+    } finally {
+      setSubmittingEditorial(false)
+    }
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -106,6 +233,12 @@ export default function Admin() {
                 className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
               >
                 Submit Paper
+              </Link>
+              <Link
+                href="/admin/editorial-board"
+                className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
+              >
+                Editorial Board
               </Link>
             </nav>
           </div>
@@ -211,7 +344,7 @@ export default function Admin() {
                             View DOCX
                           </a>
                           <a
-                            href={article.pdf_url}
+                            href={article.docx_url}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="text-blue-600 hover:text-blue-800 text-sm"
@@ -249,6 +382,171 @@ export default function Admin() {
               </div>
             </div>
           )}
+
+          {/* Editorial Board Management Section */}
+          <div className="mt-12">
+            <div className="bg-white shadow rounded-lg overflow-hidden">
+              <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+                <div>
+                  <h3 className="text-lg font-medium text-gray-900">Editorial Board</h3>
+                  <p className="text-sm text-gray-500 mt-1">Manage editorial board members</p>
+                </div>
+                <button
+                  onClick={() => setShowEditorialForm(!showEditorialForm)}
+                  className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded hover:bg-blue-700"
+                >
+                  {showEditorialForm ? 'Cancel' : '+ Add Member'}
+                </button>
+              </div>
+
+              {/* Add Member Form */}
+              {showEditorialForm && (
+                <div className="px-6 py-6 border-b border-gray-200 bg-gray-50">
+                  <h4 className="text-md font-medium text-gray-900 mb-4">Add New Editorial Board Member</h4>
+                  <form onSubmit={handleEditorialSubmit} className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Name *
+                        </label>
+                        <input
+                          type="text"
+                          value={editorialFormData.name}
+                          onChange={(e) => setEditorialFormData({ ...editorialFormData, name: e.target.value })}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                          required
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Profession *
+                        </label>
+                        <input
+                          type="text"
+                          value={editorialFormData.title}
+                          onChange={(e) => setEditorialFormData({ ...editorialFormData, title: e.target.value })}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                          placeholder="e.g., Professor, Doctor, Researcher"
+                          required
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Phone Number
+                        </label>
+                        <input
+                          type="tel"
+                          value={editorialFormData.phone_number}
+                          onChange={(e) => setEditorialFormData({ ...editorialFormData, phone_number: e.target.value })}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                          placeholder="+1234567890"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Email
+                        </label>
+                        <input
+                          type="email"
+                          value={editorialFormData.email}
+                          onChange={(e) => setEditorialFormData({ ...editorialFormData, email: e.target.value })}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                          placeholder="member@example.com"
+                        />
+                      </div>
+
+                      <div className="md:col-span-2">
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Affiliation
+                        </label>
+                        <input
+                          type="text"
+                          value={editorialFormData.affiliation}
+                          onChange={(e) => setEditorialFormData({ ...editorialFormData, affiliation: e.target.value })}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                          placeholder="e.g., University Name, Institution"
+                        />
+                      </div>
+
+                      <div className="md:col-span-2">
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Profile Picture
+                        </label>
+                        <input
+                          type="file"
+                          accept="image/png,image/jpeg,image/jpg,image/webp"
+                          onChange={handlePhotoChange}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                        />
+                        <p className="text-xs text-gray-500 mt-1">Max 5MB. PNG, JPG, JPEG, or WEBP</p>
+                        {editorialFormData.photo_file && (
+                          <p className="text-sm text-green-600 mt-1">✓ {editorialFormData.photo_file.name} selected</p>
+                        )}
+                      </div>
+
+                      <div className="md:col-span-2">
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Bio (Optional)
+                        </label>
+                        <textarea
+                          value={editorialFormData.bio}
+                          onChange={(e) => setEditorialFormData({ ...editorialFormData, bio: e.target.value })}
+                          rows={3}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                          placeholder="Brief biography or description..."
+                        />
+                      </div>
+                    </div>
+
+                    <div className="flex justify-end">
+                      <button
+                        type="submit"
+                        disabled={submittingEditorial}
+                        className="px-6 py-2 bg-blue-600 text-white text-sm font-medium rounded hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {submittingEditorial ? 'Adding...' : 'Add Member'}
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              )}
+
+              {/* Members List */}
+              <div className="divide-y divide-gray-200">
+                {editorialMembers.length === 0 ? (
+                  <div className="px-6 py-8 text-center text-gray-500">
+                    <p>No editorial board members yet. Add one using the button above.</p>
+                  </div>
+                ) : (
+                  editorialMembers.map((member) => (
+                    <div key={member.id} className="px-6 py-4">
+                      <div className="flex items-center space-x-4">
+                        {member.photo_url && (
+                          <img
+                            src={member.photo_url}
+                            alt={member.name}
+                            className="w-16 h-16 rounded-full object-cover"
+                          />
+                        )}
+                        <div className="flex-1">
+                          <h4 className="text-lg font-medium text-gray-900">{member.name}</h4>
+                          <p className="text-sm text-gray-600">{member.title}</p>
+                          <p className="text-sm text-gray-500">{member.affiliation}</p>
+                          <div className="mt-2 flex space-x-4 text-sm text-gray-500">
+                            {member.email && <span>📧 {member.email}</span>}
+                            {member.phone_number && <span>📞 {member.phone_number}</span>}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+          </div>
         </div>
       </main>
     </div>

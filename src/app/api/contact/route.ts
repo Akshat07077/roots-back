@@ -4,12 +4,12 @@ import { supabaseAdmin } from '@/lib/supabase'
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { name, email, subject, message, phone, organization } = body
+    const { name, email, message } = body
 
     // Validate required fields
-    if (!name || !email || !subject || !message) {
+    if (!name || !email || !message) {
       return NextResponse.json(
-        { error: 'Name, email, subject, and message are required' },
+        { error: 'Name, email, and message are required' },
         { status: 400 }
       )
     }
@@ -29,10 +29,7 @@ export async function POST(request: NextRequest) {
       .insert({
         name: name.trim(),
         email: email.trim().toLowerCase(),
-        subject: subject.trim(),
-        message: message.trim(),
-        phone: phone?.trim() || null,
-        organization: organization?.trim() || null
+        message: message.trim()
       })
       .select()
       .single()
@@ -48,7 +45,6 @@ export async function POST(request: NextRequest) {
         id: contact.id,
         name: contact.name,
         email: contact.email,
-        subject: contact.subject,
         created_at: contact.created_at
       }
     })

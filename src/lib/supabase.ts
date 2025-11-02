@@ -1,12 +1,26 @@
 import { createClient } from '@supabase/supabase-js'
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://knfmbyvvsefdrdmyjeqb.supabase.co'
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtuZm1ieXZ2c2VmZHJkbXlqZXFiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA4NTM2MTQsImV4cCI6MjA3NjQyOTYxNH0.Lwu2ALfKRAPk_T9SauTqFE24dSKi_uDmgYyw9kFCG48'
+// Get Supabase credentials from environment variables
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
 
+// Validate that required environment variables are set
+if (!supabaseUrl) {
+  throw new Error('Missing NEXT_PUBLIC_SUPABASE_URL environment variable')
+}
+
+if (!supabaseAnonKey) {
+  throw new Error('Missing NEXT_PUBLIC_SUPABASE_ANON_KEY environment variable')
+}
+
+if (!supabaseServiceRoleKey) {
+  throw new Error('Missing SUPABASE_SERVICE_ROLE_KEY environment variable')
+}
+
+// Create Supabase client for client-side operations (uses anon key)
 export const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
-// For server-side operations that require service role
-export const supabaseAdmin = createClient(
-  supabaseUrl,
-  process.env.SUPABASE_SERVICE_ROLE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtuZm1ieXZ2c2VmZHJkbXlqZXFiIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2MDg1MzYxNCwiZXhwIjoyMDc2NDI5NjE0fQ.xlsELw9fDJbZCKjX0HgPV-evxEoLsxjpzfuNE_G4lMQ'
-)
+// Create Supabase admin client for server-side operations (uses service role key)
+// This bypasses Row Level Security and should only be used in API routes
+export const supabaseAdmin = createClient(supabaseUrl, supabaseServiceRoleKey)

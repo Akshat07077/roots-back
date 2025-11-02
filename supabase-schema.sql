@@ -25,6 +25,7 @@ CREATE TABLE articles (
 INSERT INTO storage.buckets (id, name, public) VALUES ('documents', 'documents', false);
 INSERT INTO storage.buckets (id, name, public) VALUES ('pdfs', 'pdfs', true);
 INSERT INTO storage.buckets (id, name, public) VALUES ('payments', 'payments', false);
+INSERT INTO storage.buckets (id, name, public) VALUES ('editorial-photos', 'editorial-photos', true);
 
 -- Create storage policies
 CREATE POLICY "Allow public read access to PDFs" ON storage.objects
@@ -38,6 +39,12 @@ CREATE POLICY "Allow service role to manage all files" ON storage.objects
 
 CREATE POLICY "Allow service role to manage payment screenshots" ON storage.objects
   FOR ALL USING (bucket_id = 'payments' AND auth.role() = 'service_role');
+
+CREATE POLICY "Allow public read access to editorial photos" ON storage.objects
+  FOR SELECT USING (bucket_id = 'editorial-photos');
+
+CREATE POLICY "Allow service role to manage editorial photos" ON storage.objects
+  FOR ALL USING (bucket_id = 'editorial-photos' AND auth.role() = 'service_role');
 
 -- Create RLS policies for articles table
 ALTER TABLE articles ENABLE ROW LEVEL SECURITY;
@@ -70,10 +77,7 @@ CREATE TABLE contact_us (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   name VARCHAR(255) NOT NULL,
   email VARCHAR(255) NOT NULL,
-  subject VARCHAR(255) NOT NULL,
   message TEXT NOT NULL,
-  phone VARCHAR(20),
-  organization VARCHAR(255),
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
@@ -84,6 +88,7 @@ CREATE TABLE editorial_board (
   title VARCHAR(255) NOT NULL,
   affiliation VARCHAR(255) NOT NULL,
   email VARCHAR(255),
+  phone_number VARCHAR(20),
   bio TEXT,
   photo_url TEXT,
   order_index INTEGER DEFAULT 0,
