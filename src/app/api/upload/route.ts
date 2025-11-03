@@ -49,7 +49,7 @@ export async function POST(request: NextRequest) {
     const fileName = `${Date.now()}-${file.name}`
 
     // Upload DOCX to Supabase Storage
-    const { data: docxData, error: docxError } = await supabaseAdmin.storage
+    const { error: docxError } = await supabaseAdmin.storage
       .from('documents')
       .upload(fileName, Buffer.from(fileBuffer), {
         contentType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
@@ -70,7 +70,7 @@ export async function POST(request: NextRequest) {
       const paymentBuffer = await paymentScreenshot.arrayBuffer()
       const paymentFileName = `payment-${Date.now()}-${paymentScreenshot.name}`
       
-      const { data: paymentData, error: paymentError } = await supabaseAdmin.storage
+      const { error: paymentError } = await supabaseAdmin.storage
         .from('payments')
         .upload(paymentFileName, Buffer.from(paymentBuffer), {
           contentType: paymentScreenshot.type

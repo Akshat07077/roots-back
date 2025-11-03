@@ -30,12 +30,13 @@ export async function GET(request: NextRequest) {
       { articles: articles || [] },
       { headers: corsHeaders(request.headers.get('origin')) }
     )
-  } catch (error: any) {
+  } catch (error) {
     console.error('Articles fetch error:', error)
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error'
     return NextResponse.json(
       { 
         error: 'Failed to fetch articles',
-        details: error?.message || 'Unknown error'
+        details: errorMessage
       },
       { status: 500, headers: corsHeaders(request.headers.get('origin')) }
     )

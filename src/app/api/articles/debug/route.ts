@@ -33,12 +33,13 @@ export async function GET() {
       articles: allArticles || [],
       message: `Found ${statusCounts.total} total articles. ${statusCounts.approved} approved, ${statusCounts.pending} pending, ${statusCounts.rejected} rejected.`
     })
-  } catch (error: any) {
+  } catch (error) {
     console.error('Debug articles fetch error:', error)
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error'
     return NextResponse.json(
       { 
         error: 'Failed to fetch articles',
-        details: error?.message || 'Unknown error'
+        details: errorMessage
       },
       { status: 500 }
     )

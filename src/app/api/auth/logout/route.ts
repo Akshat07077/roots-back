@@ -1,6 +1,6 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 
-export async function POST(request: NextRequest) {
+export async function POST() {
   try {
     // Clear the session cookie
     return NextResponse.json({
@@ -12,7 +12,7 @@ export async function POST(request: NextRequest) {
       }
     })
 
-  } catch (error: any) {
+  } catch (error) {
     console.error('Logout error:', error)
     return NextResponse.json(
       { error: 'Failed to logout. Please try again.' },

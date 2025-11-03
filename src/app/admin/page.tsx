@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 
 interface Article {
   id: string
@@ -83,7 +84,7 @@ export default function Admin() {
       } else {
         alert(data.error || 'Failed to update article')
       }
-    } catch (error) {
+    } catch {
       alert('Network error. Please try again.')
     } finally {
       setUpdating(null)
@@ -202,9 +203,10 @@ export default function Admin() {
       } else {
         alert(data.error || 'Failed to add member')
       }
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error adding member:', error)
-      alert(error?.message || 'Failed to add editorial board member')
+      const errorMessage = error instanceof Error ? error.message : 'Failed to add editorial board member'
+      alert(errorMessage)
     } finally {
       setSubmittingEditorial(false)
     }
@@ -525,10 +527,13 @@ export default function Admin() {
                     <div key={member.id} className="px-6 py-4">
                       <div className="flex items-center space-x-4">
                         {member.photo_url && (
-                          <img
+                          <Image
                             src={member.photo_url}
                             alt={member.name}
+                            width={64}
+                            height={64}
                             className="w-16 h-16 rounded-full object-cover"
+                            unoptimized
                           />
                         )}
                         <div className="flex-1">

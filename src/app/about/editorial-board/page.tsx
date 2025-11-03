@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 
 interface EditorialMember {
   id: string
@@ -33,7 +34,7 @@ export default function PublicEditorialBoard() {
       } else {
         setError(data.error || 'Failed to fetch editorial board members')
       }
-    } catch (error) {
+    } catch {
       setError('Network error. Please try again.')
     } finally {
       setLoading(false)
@@ -116,10 +117,13 @@ export default function PublicEditorialBoard() {
                 <div key={member.id} className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
                   <div className="text-center">
                     {member.photo_url ? (
-                      <img
+                      <Image
                         src={member.photo_url}
                         alt={member.name}
+                        width={96}
+                        height={96}
                         className="mx-auto h-24 w-24 rounded-full object-cover mb-4"
+                        unoptimized
                       />
                     ) : (
                       <div className="mx-auto h-24 w-24 rounded-full bg-gray-200 flex items-center justify-center mb-4">
@@ -167,7 +171,7 @@ export default function PublicEditorialBoard() {
               Interested in Joining Our Editorial Board?
             </h2>
             <p className="text-blue-800 mb-6">
-              We're always looking for qualified experts to join our editorial board. If you're interested in contributing to our academic review process, we'd love to hear from you.
+              We&apos;re always looking for qualified experts to join our editorial board. If you&apos;re interested in contributing to our academic review process, we&apos;d love to hear from you.
             </p>
             <Link
               href="/contact"

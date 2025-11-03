@@ -1,7 +1,8 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 
 interface EditorialMember {
   id: string
@@ -34,11 +35,7 @@ export default function EditorialBoardAdmin() {
     bio: ''
   })
 
-  useEffect(() => {
-    fetchMembers()
-  }, [])
-
-  const fetchMembers = async () => {
+  const fetchMembers = useCallback(async () => {
     try {
       setLoading(true)
       const response = await fetch('/api/editorial-board')
@@ -54,7 +51,11 @@ export default function EditorialBoardAdmin() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [])
+
+  useEffect(() => {
+    fetchMembers()
+  }, [fetchMembers])
 
   const showMessage = (msg: string, type: 'success' | 'error') => {
     setMessage(msg)
@@ -139,9 +140,10 @@ export default function EditorialBoardAdmin() {
       } else {
         showMessage(data.error || 'Failed to add member', 'error')
       }
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error adding member:', error)
-      showMessage(error?.message || 'Failed to add editorial board member', 'error')
+      const errorMessage = error instanceof Error ? error.message : 'Failed to add editorial board member'
+      showMessage(errorMessage, 'error')
     } finally {
       setSubmitting(false)
     }
@@ -182,7 +184,7 @@ export default function EditorialBoardAdmin() {
       } else {
         showMessage(data.error || 'Failed to delete member', 'error')
       }
-    } catch (error) {
+    } catch {
       showMessage('Network error. Please try again.', 'error')
     }
   }
@@ -415,10 +417,13 @@ export default function EditorialBoardAdmin() {
                       {/* Profile Picture */}
                       <div className="flex-shrink-0">
                         {member.photo_url ? (
-                          <img
+                          <Image
                             src={member.photo_url}
                             alt={member.name}
+                            width={80}
+                            height={80}
                             className="w-20 h-20 rounded-full object-cover border-2 border-gray-200"
+                            unoptimized
                           />
                         ) : (
                           <div className="w-20 h-20 rounded-full bg-gray-200 flex items-center justify-center">

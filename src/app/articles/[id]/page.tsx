@@ -34,7 +34,7 @@ export default function ArticlePage() {
       } else {
         setError('Article not found')
       }
-    } catch (error) {
+    } catch {
       setError('Failed to fetch article')
     } finally {
       setLoading(false)

@@ -46,7 +46,7 @@ export async function POST(request: NextRequest) {
 
     // Upload to Supabase Storage (create 'editorial-photos' bucket if needed, or use existing)
     // First, try to upload to a new bucket or use existing storage
-    const { data: uploadData, error: uploadError } = await supabaseAdmin.storage
+    const { error: uploadError } = await supabaseAdmin.storage
       .from('editorial-photos')
       .upload(fileName, Buffer.from(fileBuffer), {
         contentType: file.type,
@@ -79,7 +79,7 @@ export async function POST(request: NextRequest) {
       { headers: corsHeaders(request.headers.get('origin')) }
     )
 
-  } catch (error: any) {
+  } catch (error) {
     console.error('Profile picture upload error:', error)
     return NextResponse.json(
       { error: 'Failed to upload profile picture. Please try again.' },
