@@ -1,7 +1,15 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
+import { corsHeaders } from '@/lib/cors'
 
-export async function GET() {
+export async function OPTIONS(request: NextRequest) {
+  return new NextResponse(null, {
+    status: 200,
+    headers: corsHeaders(request.headers.get('origin')),
+  })
+}
+
+export async function GET(request: NextRequest) {
   try {
     // Use supabaseAdmin for server-side API routes to bypass RLS
     // Filter only approved articles for public display
@@ -18,7 +26,10 @@ export async function GET() {
 
     console.log(`✅ Fetched ${articles?.length || 0} approved articles`)
     
-    return NextResponse.json({ articles: articles || [] })
+    return NextResponse.json(
+      { articles: articles || [] },
+      { headers: corsHeaders(request.headers.get('origin')) }
+    )
   } catch (error: any) {
     console.error('Articles fetch error:', error)
     return NextResponse.json(
@@ -26,7 +37,7 @@ export async function GET() {
         error: 'Failed to fetch articles',
         details: error?.message || 'Unknown error'
       },
-      { status: 500 }
+      { status: 500, headers: corsHeaders(request.headers.get('origin')) }
     )
   }
 }

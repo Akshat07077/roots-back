@@ -1,5 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
+import { corsHeaders } from '@/lib/cors'
+
+export async function OPTIONS(request: NextRequest) {
+  return new NextResponse(null, {
+    status: 200,
+    headers: corsHeaders(request.headers.get('origin')),
+  })
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -10,7 +18,7 @@ export async function POST(request: NextRequest) {
     if (!name || !email || !message) {
       return NextResponse.json(
         { error: 'Name, email, and message are required' },
-        { status: 400 }
+        { status: 400, headers: corsHeaders(request.headers.get('origin')) }
       )
     }
 
@@ -19,7 +27,7 @@ export async function POST(request: NextRequest) {
     if (!emailRegex.test(email)) {
       return NextResponse.json(
         { error: 'Please provide a valid email address' },
-        { status: 400 }
+        { status: 400, headers: corsHeaders(request.headers.get('origin')) }
       )
     }
 
@@ -38,27 +46,30 @@ export async function POST(request: NextRequest) {
       throw new Error(`Failed to save contact submission: ${error.message}`)
     }
 
-    return NextResponse.json({
-      success: true,
-      message: 'Thank you for your message! We will get back to you soon.',
-      contact: {
-        id: contact.id,
-        name: contact.name,
-        email: contact.email,
-        created_at: contact.created_at
-      }
-    })
+    return NextResponse.json(
+      {
+        success: true,
+        message: 'Thank you for your message! We will get back to you soon.',
+        contact: {
+          id: contact.id,
+          name: contact.name,
+          email: contact.email,
+          created_at: contact.created_at
+        }
+      },
+      { headers: corsHeaders(request.headers.get('origin')) }
+    )
 
   } catch (error) {
     console.error('Contact form error:', error)
     return NextResponse.json(
       { error: 'Failed to submit contact form. Please try again.' },
-      { status: 500 }
+      { status: 500, headers: corsHeaders(request.headers.get('origin')) }
     )
   }
 }
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
     const { data: contacts, error } = await supabaseAdmin
       .from('contact_us')
@@ -69,12 +80,15 @@ export async function GET() {
       throw new Error(`Failed to fetch contact submissions: ${error.message}`)
     }
 
-    return NextResponse.json({ contacts })
+    return NextResponse.json(
+      { contacts },
+      { headers: corsHeaders(request.headers.get('origin')) }
+    )
   } catch (error) {
     console.error('Contact fetch error:', error)
     return NextResponse.json(
       { error: 'Failed to fetch contact submissions' },
-      { status: 500 }
+      { status: 500, headers: corsHeaders(request.headers.get('origin')) }
     )
   }
 }

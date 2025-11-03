@@ -1,5 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import { corsHeaders } from '@/lib/cors'
+
+export async function OPTIONS(request: NextRequest) {
+  return new NextResponse(null, {
+    status: 200,
+    headers: corsHeaders(request.headers.get('origin')),
+  })
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -10,7 +18,7 @@ export async function POST(request: NextRequest) {
     if (!email || !password) {
       return NextResponse.json(
         { error: 'Email and password are required' },
-        { status: 400 }
+        { status: 400, headers: corsHeaders(request.headers.get('origin')) }
       )
     }
 
@@ -36,7 +44,7 @@ export async function POST(request: NextRequest) {
           authError.message.includes('Email not confirmed')) {
         return NextResponse.json(
           { error: 'Invalid email or password' },
-          { status: 401 }
+          { status: 401, headers: corsHeaders(request.headers.get('origin')) }
         )
       }
       throw new Error(`Authentication failed: ${authError.message}`)
@@ -47,6 +55,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Return session token and user info
+    const corsHeader = corsHeaders(request.headers.get('origin'))
     return NextResponse.json({
       success: true,
       message: 'Login successful',
@@ -61,6 +70,7 @@ export async function POST(request: NextRequest) {
       }
     }, {
       headers: {
+        ...corsHeader,
         'Set-Cookie': `sb-access-token=${authData.session.access_token}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${authData.session.expires_in}`
       }
     })
@@ -69,7 +79,7 @@ export async function POST(request: NextRequest) {
     console.error('Login error:', error)
     return NextResponse.json(
       { error: error?.message || 'Failed to login. Please try again.' },
-      { status: 500 }
+      { status: 500, headers: corsHeaders(request.headers.get('origin')) }
     )
   }
 }

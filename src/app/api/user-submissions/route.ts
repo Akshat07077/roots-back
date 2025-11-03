@@ -1,5 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
+import { corsHeaders } from '@/lib/cors'
+
+export async function OPTIONS(request: NextRequest) {
+  return new NextResponse(null, {
+    status: 200,
+    headers: corsHeaders(request.headers.get('origin')),
+  })
+}
 
 export async function GET(request: NextRequest) {
   try {
@@ -7,7 +15,10 @@ export async function GET(request: NextRequest) {
     const email = searchParams.get('email')
 
     if (!email) {
-      return NextResponse.json({ error: 'Email parameter is required' }, { status: 400 })
+      return NextResponse.json(
+        { error: 'Email parameter is required' },
+        { status: 400, headers: corsHeaders(request.headers.get('origin')) }
+      )
     }
 
     // Get user and their submissions
@@ -32,15 +43,21 @@ export async function GET(request: NextRequest) {
       .single()
 
     if (userError) {
-      return NextResponse.json({ error: 'User not found' }, { status: 404 })
+      return NextResponse.json(
+        { error: 'User not found' },
+        { status: 404, headers: corsHeaders(request.headers.get('origin')) }
+      )
     }
 
-    return NextResponse.json({ user })
+    return NextResponse.json(
+      { user },
+      { headers: corsHeaders(request.headers.get('origin')) }
+    )
   } catch (error) {
     console.error('User submissions fetch error:', error)
     return NextResponse.json(
       { error: 'Failed to fetch user submissions' },
-      { status: 500 }
+      { status: 500, headers: corsHeaders(request.headers.get('origin')) }
     )
   }
 }

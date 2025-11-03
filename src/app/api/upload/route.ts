@@ -1,5 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
+import { corsHeaders } from '@/lib/cors'
+
+export async function OPTIONS(request: NextRequest) {
+  return new NextResponse(null, {
+    status: 200,
+    headers: corsHeaders(request.headers.get('origin')),
+  })
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -12,18 +20,27 @@ export async function POST(request: NextRequest) {
     const paymentScreenshot = formData.get('paymentScreenshot') as File
 
     if (!file || !title || !authorName || !email || !mobileNumber) {
-      return NextResponse.json({ error: 'File, title, author name, email, and mobile number are required' }, { status: 400 })
+      return NextResponse.json(
+        { error: 'File, title, author name, email, and mobile number are required' },
+        { status: 400, headers: corsHeaders(request.headers.get('origin')) }
+      )
     }
 
     if (!file.name.endsWith('.docx')) {
-      return NextResponse.json({ error: 'Only DOCX files are allowed' }, { status: 400 })
+      return NextResponse.json(
+        { error: 'Only DOCX files are allowed' },
+        { status: 400, headers: corsHeaders(request.headers.get('origin')) }
+      )
     }
 
     // Validate payment screenshot if provided
     if (paymentScreenshot && paymentScreenshot.size > 0) {
       const allowedTypes = ['image/png', 'image/jpeg', 'image/jpg']
       if (!allowedTypes.includes(paymentScreenshot.type)) {
-        return NextResponse.json({ error: 'Payment screenshot must be PNG or JPG' }, { status: 400 })
+        return NextResponse.json(
+          { error: 'Payment screenshot must be PNG or JPG' },
+          { status: 400, headers: corsHeaders(request.headers.get('origin')) }
+        )
       }
     }
 
@@ -116,21 +133,24 @@ export async function POST(request: NextRequest) {
       throw new Error(`Failed to save article: ${dbError.message}`)
     }
 
-    return NextResponse.json({
-      success: true,
-      article: {
-        id: article.id,
-        title: article.title,
-        status: article.status,
-        created_at: article.created_at
-      }
-    })
+    return NextResponse.json(
+      {
+        success: true,
+        article: {
+          id: article.id,
+          title: article.title,
+          status: article.status,
+          created_at: article.created_at
+        }
+      },
+      { headers: corsHeaders(request.headers.get('origin')) }
+    )
 
   } catch (error) {
     console.error('Upload error:', error)
     return NextResponse.json(
       { error: 'Failed to process upload' },
-      { status: 500 }
+      { status: 500, headers: corsHeaders(request.headers.get('origin')) }
     )
   }
 }

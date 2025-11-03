@@ -1,7 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
+import { corsHeaders } from '@/lib/cors'
 
-export async function GET() {
+export async function OPTIONS(request: NextRequest) {
+  return new NextResponse(null, {
+    status: 200,
+    headers: corsHeaders(request.headers.get('origin')),
+  })
+}
+
+export async function GET(request: NextRequest) {
   try {
     const { data: members, error } = await supabaseAdmin
       .from('editorial_board')
@@ -13,12 +21,15 @@ export async function GET() {
       throw new Error(`Failed to fetch editorial board members: ${error.message}`)
     }
 
-    return NextResponse.json({ members })
+    return NextResponse.json(
+      { members },
+      { headers: corsHeaders(request.headers.get('origin')) }
+    )
   } catch (error) {
     console.error('Editorial board fetch error:', error)
     return NextResponse.json(
       { error: 'Failed to fetch editorial board members' },
-      { status: 500 }
+      { status: 500, headers: corsHeaders(request.headers.get('origin')) }
     )
   }
 }
@@ -41,7 +52,7 @@ export async function POST(request: NextRequest) {
     if (!name || !title) {
       return NextResponse.json(
         { error: 'Name and title (profession) are required' },
-        { status: 400 }
+        { status: 400, headers: corsHeaders(request.headers.get('origin')) }
       )
     }
 
@@ -77,17 +88,20 @@ export async function POST(request: NextRequest) {
       throw new Error(`Failed to save editorial board member: ${error.message}`)
     }
 
-    return NextResponse.json({
-      success: true,
-      message: 'Editorial board member added successfully',
-      member
-    })
+    return NextResponse.json(
+      {
+        success: true,
+        message: 'Editorial board member added successfully',
+        member
+      },
+      { headers: corsHeaders(request.headers.get('origin')) }
+    )
 
   } catch (error) {
     console.error('Editorial board creation error:', error)
     return NextResponse.json(
       { error: 'Failed to add editorial board member. Please try again.' },
-      { status: 500 }
+      { status: 500, headers: corsHeaders(request.headers.get('origin')) }
     )
   }
 }
@@ -111,7 +125,7 @@ export async function PUT(request: NextRequest) {
     if (!id) {
       return NextResponse.json(
         { error: 'Member ID is required for update' },
-        { status: 400 }
+        { status: 400, headers: corsHeaders(request.headers.get('origin')) }
       )
     }
 
@@ -119,7 +133,7 @@ export async function PUT(request: NextRequest) {
     if (!name || !title) {
       return NextResponse.json(
         { error: 'Name and title are required' },
-        { status: 400 }
+        { status: 400, headers: corsHeaders(request.headers.get('origin')) }
       )
     }
 
@@ -129,7 +143,7 @@ export async function PUT(request: NextRequest) {
       if (!emailRegex.test(email)) {
         return NextResponse.json(
           { error: 'Please provide a valid email address' },
-          { status: 400 }
+          { status: 400, headers: corsHeaders(request.headers.get('origin')) }
         )
       }
     }
@@ -160,21 +174,24 @@ export async function PUT(request: NextRequest) {
     if (!member) {
       return NextResponse.json(
         { error: 'Editorial board member not found' },
-        { status: 404 }
+        { status: 404, headers: corsHeaders(request.headers.get('origin')) }
       )
     }
 
-    return NextResponse.json({
-      success: true,
-      message: 'Editorial board member updated successfully',
-      member
-    })
+    return NextResponse.json(
+      {
+        success: true,
+        message: 'Editorial board member updated successfully',
+        member
+      },
+      { headers: corsHeaders(request.headers.get('origin')) }
+    )
 
   } catch (error) {
     console.error('Editorial board update error:', error)
     return NextResponse.json(
       { error: 'Failed to update editorial board member. Please try again.' },
-      { status: 500 }
+      { status: 500, headers: corsHeaders(request.headers.get('origin')) }
     )
   }
 }
@@ -187,7 +204,7 @@ export async function DELETE(request: NextRequest) {
     if (!id) {
       return NextResponse.json(
         { error: 'Member ID is required for deletion' },
-        { status: 400 }
+        { status: 400, headers: corsHeaders(request.headers.get('origin')) }
       )
     }
 
@@ -209,20 +226,23 @@ export async function DELETE(request: NextRequest) {
     if (!member) {
       return NextResponse.json(
         { error: 'Editorial board member not found' },
-        { status: 404 }
+        { status: 404, headers: corsHeaders(request.headers.get('origin')) }
       )
     }
 
-    return NextResponse.json({
-      success: true,
-      message: 'Editorial board member deleted successfully'
-    })
+    return NextResponse.json(
+      {
+        success: true,
+        message: 'Editorial board member deleted successfully'
+      },
+      { headers: corsHeaders(request.headers.get('origin')) }
+    )
 
   } catch (error) {
     console.error('Editorial board deletion error:', error)
     return NextResponse.json(
       { error: 'Failed to delete editorial board member. Please try again.' },
-      { status: 500 }
+      { status: 500, headers: corsHeaders(request.headers.get('origin')) }
     )
   }
 }
