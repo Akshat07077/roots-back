@@ -64,9 +64,7 @@ export default function UploadTest() {
         formData.append('paymentScreenshot', paymentScreenshot)
       }
 
-      // eslint-disable-next-line react/no-unescaped-entities
       console.log('🚀 Uploading file:', file.name)
-      // eslint-disable-next-line react/no-unescaped-entities
       console.log('📝 Title:', title)
 
       const response = await fetch('/api/upload', {

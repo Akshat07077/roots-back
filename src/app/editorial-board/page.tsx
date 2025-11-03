@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 
 interface EditorialMember {
   id: string
@@ -47,7 +48,7 @@ export default function EditorialBoard() {
       } else {
         setError(data.error || 'Failed to fetch editorial board members')
       }
-    } catch (error) {
+    } catch {
       setError('Network error. Please try again.')
     } finally {
       setLoading(false)
@@ -89,7 +90,7 @@ export default function EditorialBoard() {
       } else {
         alert(data.error || 'Failed to add member')
       }
-    } catch (error) {
+    } catch {
       alert('Network error. Please try again.')
     }
   }
@@ -134,7 +135,7 @@ export default function EditorialBoard() {
       } else {
         alert(data.error || 'Failed to update member')
       }
-    } catch (error) {
+    } catch {
       alert('Network error. Please try again.')
     }
   }
@@ -157,7 +158,7 @@ export default function EditorialBoard() {
       } else {
         alert(data.error || 'Failed to delete member')
       }
-    } catch (error) {
+    } catch {
       alert('Network error. Please try again.')
     }
   }
@@ -398,10 +399,13 @@ export default function EditorialBoard() {
                       <div className="flex-1">
                         <div className="flex items-center space-x-4">
                           {member.photo_url && (
-                            <img
+                            <Image
                               src={member.photo_url}
                               alt={member.name}
+                              width={64}
+                              height={64}
                               className="h-16 w-16 rounded-full object-cover"
+                              unoptimized
                             />
                           )}
                           <div>
