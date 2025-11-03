@@ -57,7 +57,7 @@ node test-api.js
 ### Required Environment Variables
 ```env
 NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJ... (anon public key)
+NEXT_PUBLI_SUPABASE_ANON_KEY=eyJ... (anon public key)
 SUPABASE_SERVICE_ROLE_KEY=eyJ... (service role key - keep secret!)
 ```
 
