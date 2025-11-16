@@ -62,7 +62,7 @@ export async function POST(request: NextRequest) {
       if (!emailRegex.test(email)) {
         return NextResponse.json(
           { error: 'Please provide a valid email address' },
-          { status: 400 }
+          { status: 400, headers: corsHeaders(request.headers.get('origin')) }
         )
       }
     }
