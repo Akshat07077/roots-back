@@ -12,11 +12,11 @@ export async function OPTIONS(request: NextRequest) {
 export async function GET(request: NextRequest) {
   try {
     // Use supabaseAdmin for server-side API routes to bypass RLS
-    // Filter only approved articles for public display
+    // Filter only published articles for public display (with volume and issue)
     const { data: articles, error } = await supabaseAdmin
       .from('articles')
       .select('*')
-      .eq('status', 'approved')
+      .eq('is_published', true)
       .order('created_at', { ascending: false })
 
     if (error) {

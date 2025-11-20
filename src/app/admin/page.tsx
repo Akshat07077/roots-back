@@ -12,6 +12,9 @@ interface Article {
   status: 'pending' | 'approved' | 'rejected'
   created_at: string
   updated_at: string
+  volume?: string
+  issue?: string
+  is_published?: boolean
 }
 
 interface EditorialMember {
@@ -29,6 +32,16 @@ export default function Admin() {
   const [articles, setArticles] = useState<Article[]>([])
   const [loading, setLoading] = useState(true)
   const [updating, setUpdating] = useState<string | null>(null)
+  
+  // Publication form state
+  const [showPublishForm, setShowPublishForm] = useState(false)
+  const [publishing, setPublishing] = useState(false)
+  const [publishFormData, setPublishFormData] = useState({
+    articleId: '',
+    volume: '',
+    issue: '',
+    pdfFile: null as File | null
+  })
   
   // Editorial Board State
   const [showEditorialForm, setShowEditorialForm] = useState(false)
@@ -132,6 +145,68 @@ export default function Admin() {
         return
       }
       setEditorialFormData({ ...editorialFormData, photo_file: file })
+    }
+  }
+
+  const handlePublishSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    
+    if (!publishFormData.volume || !publishFormData.issue || !publishFormData.pdfFile) {
+      alert('Please fill in all required fields: Volume, Issue, and PDF file')
+      return
+    }
+
+    setPublishing(true)
+
+    try {
+      const formData = new FormData()
+      formData.append('volume', publishFormData.volume)
+      formData.append('issue', publishFormData.issue)
+      formData.append('pdf', publishFormData.pdfFile)
+      if (publishFormData.articleId) {
+        formData.append('articleId', publishFormData.articleId)
+      }
+
+      const response = await fetch('/api/admin/publish', {
+        method: 'POST',
+        body: formData
+      })
+
+      const data = await response.json()
+
+      if (response.ok) {
+        alert('Article published successfully!')
+        setPublishFormData({
+          articleId: '',
+          volume: '',
+          issue: '',
+          pdfFile: null
+        })
+        setShowPublishForm(false)
+        fetchArticles() // Refresh articles list
+      } else {
+        alert(data.error || 'Failed to publish article')
+      }
+    } catch (error) {
+      console.error('Error publishing article:', error)
+      alert('Failed to publish article. Please try again.')
+    } finally {
+      setPublishing(false)
+    }
+  }
+
+  const handlePdfFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      if (!file.name.endsWith('.pdf')) {
+        alert('Please select a PDF file')
+        return
+      }
+      if (file.size > 50 * 1024 * 1024) {
+        alert('PDF file size must be less than 50MB')
+        return
+      }
+      setPublishFormData({ ...publishFormData, pdfFile: file })
     }
   }
 
@@ -345,14 +420,24 @@ export default function Admin() {
                           >
                             View DOCX
                           </a>
-                          <a
-                            href={article.docx_url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-blue-600 hover:text-blue-800 text-sm"
-                          >
-                            View PDF
-                          </a>
+                          {article.pdf_url && (
+                            <a
+                              href={article.pdf_url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-blue-600 hover:text-blue-800 text-sm"
+                            >
+                              View PDF
+                            </a>
+                          )}
+                          {article.is_published && (
+                            <span className="text-green-600 text-sm font-medium">
+                              ✓ Published
+                              {article.volume && article.issue && (
+                                <span className="ml-2">(Vol: {article.volume}, Issue: {article.issue})</span>
+                              )}
+                            </span>
+                          )}
                         </div>
                       </div>
                       <div className="flex items-center space-x-3">
@@ -384,6 +469,112 @@ export default function Admin() {
               </div>
             </div>
           )}
+
+          {/* Publish Article Section */}
+          <div className="mt-12">
+            <div className="bg-white shadow rounded-lg overflow-hidden">
+              <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+                <div>
+                  <h3 className="text-lg font-medium text-gray-900">Publish Article</h3>
+                  <p className="text-sm text-gray-500 mt-1">Upload finalized PDF with volume and issue</p>
+                </div>
+                <button
+                  onClick={() => setShowPublishForm(!showPublishForm)}
+                  className="px-4 py-2 bg-green-600 text-white text-sm font-medium rounded hover:bg-green-700"
+                >
+                  {showPublishForm ? 'Cancel' : '+ Publish Article'}
+                </button>
+              </div>
+
+              {/* Publish Form */}
+              {showPublishForm && (
+                <div className="px-6 py-6 border-b border-gray-200 bg-gray-50">
+                  <h4 className="text-md font-medium text-gray-900 mb-4">Publish Finalized Article</h4>
+                  <form onSubmit={handlePublishSubmit} className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Select Approved Article (Optional)
+                      </label>
+                      <select
+                        value={publishFormData.articleId}
+                        onChange={(e) => setPublishFormData({ ...publishFormData, articleId: e.target.value })}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                      >
+                        <option value="">Create new publication (no article link)</option>
+                        {articles.filter(a => a.status === 'approved' && !a.is_published).map((article) => (
+                          <option key={article.id} value={article.id}>
+                            {article.title} - {new Date(article.created_at).toLocaleDateString()}
+                          </option>
+                        ))}
+                      </select>
+                      <p className="text-xs text-gray-500 mt-1">
+                        Leave empty to create a standalone publication, or select an approved article to link it
+                      </p>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Volume (Year) *
+                        </label>
+                        <input
+                          type="text"
+                          value={publishFormData.volume}
+                          onChange={(e) => setPublishFormData({ ...publishFormData, volume: e.target.value })}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                          placeholder="e.g., 2025"
+                          required
+                        />
+                        <p className="text-xs text-gray-500 mt-1">Refers to the year</p>
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Issue (Title) *
+                        </label>
+                        <input
+                          type="text"
+                          value={publishFormData.issue}
+                          onChange={(e) => setPublishFormData({ ...publishFormData, issue: e.target.value })}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                          placeholder="e.g., Volume 05 Issue 09 September 2025"
+                          required
+                        />
+                        <p className="text-xs text-gray-500 mt-1">Refers to the issue title</p>
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        PDF File *
+                      </label>
+                      <input
+                        type="file"
+                        accept=".pdf"
+                        onChange={handlePdfFileChange}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                        required
+                      />
+                      <p className="text-xs text-gray-500 mt-1">Max 50MB. PDF format only</p>
+                      {publishFormData.pdfFile && (
+                        <p className="text-sm text-green-600 mt-1">✓ {publishFormData.pdfFile.name} selected</p>
+                      )}
+                    </div>
+
+                    <div className="flex justify-end">
+                      <button
+                        type="submit"
+                        disabled={publishing}
+                        className="px-6 py-2 bg-green-600 text-white text-sm font-medium rounded hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {publishing ? 'Publishing...' : 'Publish Article'}
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              )}
+            </div>
+          </div>
 
           {/* Editorial Board Management Section */}
           <div className="mt-12">

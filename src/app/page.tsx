@@ -216,19 +216,32 @@ node test-api.js
         {/* Articles List */}
         {articles.length > 0 && (
           <div className="bg-white rounded-lg shadow p-6 mt-8">
-            <h2 className="text-xl font-semibold mb-4">Approved Articles ({articles.length})</h2>
+            <h2 className="text-xl font-semibold mb-4">Published Articles ({articles.length})</h2>
             <div className="space-y-3">
-              {articles.map((article: {id: string, title: string, status: string, created_at: string, docx_url?: string}) => (
+              {articles.map((article: {id: string, title: string, status: string, created_at: string, docx_url?: string, pdf_url?: string, volume?: string, issue?: string}) => (
                 <div key={article.id} className="p-3 border rounded">
                   <h3 className="font-medium">{article.title}</h3>
-                  <p className="text-sm text-gray-500">
-                    Status: {article.status} | Created: {new Date(article.created_at).toLocaleDateString()}
-                  </p>
-                  {article.docx_url && (
-                    <a href={article.docx_url} target="_blank" rel="noopener noreferrer" className="text-blue-600 text-sm">
-                      Download DOCX →
-                    </a>
-                  )}
+                  <div className="text-sm text-gray-500 space-y-1">
+                    {article.volume && article.issue && (
+                      <p>
+                        <span className="font-semibold">Volume:</span> {article.volume} | 
+                        <span className="font-semibold"> Issue:</span> {article.issue}
+                      </p>
+                    )}
+                    <p>Published: {new Date(article.created_at).toLocaleDateString()}</p>
+                  </div>
+                  <div className="mt-2 flex space-x-4">
+                    {article.pdf_url && (
+                      <a href={article.pdf_url} target="_blank" rel="noopener noreferrer" className="text-blue-600 text-sm">
+                        View PDF →
+                      </a>
+                    )}
+                    {article.docx_url && (
+                      <a href={article.docx_url} target="_blank" rel="noopener noreferrer" className="text-blue-600 text-sm">
+                        Download DOCX →
+                      </a>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>

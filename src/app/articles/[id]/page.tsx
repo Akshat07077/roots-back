@@ -9,6 +9,8 @@ interface Article {
   title: string
   pdf_url: string
   created_at: string
+  volume?: string
+  issue?: string
 }
 
 export default function ArticlePage() {
@@ -127,7 +129,15 @@ export default function ArticlePage() {
             <h1 className="text-3xl font-bold text-gray-900 mb-4">
               {article.title}
             </h1>
-            <div className="flex items-center space-x-4 text-sm text-gray-500 mb-6">
+            <div className="flex flex-col space-y-2 text-sm text-gray-500 mb-6">
+              {article.volume && article.issue && (
+                <div className="flex items-center space-x-4">
+                  <span className="font-semibold text-gray-700">Volume:</span>
+                  <span>{article.volume}</span>
+                  <span className="font-semibold text-gray-700">Issue:</span>
+                  <span>{article.issue}</span>
+                </div>
+              )}
               <span>Published: {new Date(article.created_at).toLocaleDateString()}</span>
             </div>
             
